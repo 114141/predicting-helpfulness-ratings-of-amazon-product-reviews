@@ -28,7 +28,7 @@
 #uploading json new_reviews into data frame 
 json_reviews_amazon <- jsonlite::stream_in(file("new_reviews_beauty.json"))
 
-#check datatypes of attributes of eview data
+#check datatypes of attributes of review data
 sapply(json_reviews_amazon, class)
 
 #checking to examine first like (shows first "3" rows)
