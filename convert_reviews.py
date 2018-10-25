@@ -10,6 +10,6 @@ def parse(path):
 
 #name of new file to stream (new_reviews) into and old file to get from (reviews)
 f = open("new_reviews_beauty.json", 'w')
-for l in parse("/Users/annagebre/Downloads/reviews_Beauty.json.gz"):
+for l in parse("reviews_Beauty.json.gz"):
   f.write(l + '\n')
   
