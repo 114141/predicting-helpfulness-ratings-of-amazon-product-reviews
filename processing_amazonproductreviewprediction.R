@@ -18,9 +18,10 @@
 #library(corrlot)
 #library(plyr)
 
-#READING DATA
+#READING DATA INTO R
 
-#note: original dataset is not in strict json see file "convert_reviews.py" to turn the data set into strict json
+#note: original dataset is not in strict json see file "convert_reviews.py" to turn the data set into strict json which was done
+#initially and which created the file "new_reviews_beauty.json"
 
 #uploading json new_reviews into data frame 
 json_reviews_amazon <- jsonlite::stream_in(file("new_reviews_beauty.json"))
@@ -68,7 +69,7 @@ newdf$helpful_denom <- as.numeric(as.character(newdf$helpful_denom))
 describe(newdf)
 #note that maximum numbers are very high above mean in standard deviations which indicates that there are outliers which could throw off model
 
-#EXPLORATORY DATA ANALYIS AND CREATING CLASS LABEL
+#EXPLORATORY DATA ANALYIS AND CREATING A CLASS LABEL
 
 #boxplot of distrubution of data
 names = c("overall","helpful_num","helpful_denom")
