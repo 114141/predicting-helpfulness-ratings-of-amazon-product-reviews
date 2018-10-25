@@ -1,5 +1,6 @@
-#launch new terminal and control + shift + enter - to run in rstudio
+#launch new terminal in rstudio and control + shift + enter to run
 #we are running this processes in python to convert to strict json for use in R
+
 import json
 import gzip
 
