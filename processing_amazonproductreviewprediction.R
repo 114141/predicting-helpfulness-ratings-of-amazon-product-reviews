@@ -1,3 +1,4 @@
+#uncomment to install and load packages used in this process
 #install.packages("rjson") 
 #install.packages("jsonlite")
 #insall.packages("tidyr")
@@ -17,7 +18,9 @@
 #library(corrlot)
 #library(plyr)
 
-#note: original dataset is not in strict json see python code to turn the data set into strict json
+#READING DATA
+
+#note: original dataset is not in strict json see file "convert_reviews.py" to turn the data set into strict json
 
 #uploading json new_reviews into data frame 
 json_reviews_amazon <- jsonlite::stream_in(file("new_reviews_beauty.json"))
@@ -28,13 +31,15 @@ sapply(json_reviews_amazon, class)
 #checking to examine first like (shows first "3" rows)
 head(json_reviews_amazon, 3)
 
+#FEATURE SELECTION AND CREATING NEW FEATURES
+
 #subsetting the variables we are going to use in our model - "helpful", "reviewtext" and "overall"
 newdf <- json_reviews_amazon[c(4, 6:7)]
 
 #checking that we've subsetted correctly
 head(newdf, 3)
 
-#creating new features - helpful numerator and helpful denominator
+#creating new features - "helpful numerator" and "helpful denominator"
 
 #replace all ":" with "," in the helpful column
 newdf$helpful = gsub(":",",",newdf$helpful)
@@ -61,18 +66,16 @@ newdf$helpful_denom <- as.numeric(as.character(newdf$helpful_denom))
 
 #describe the dataset
 describe(newdf)
+#note that maximum numbers are very high above mean in standard deviations which indicates that there are outliers which could throw off model
 
-#maximum numbers are very high above mean in standard deviations which indicates that there are
-#outliers which could throw off model
-
-#EXPLORATORY DATA ANALYIS
+#EXPLORATORY DATA ANALYIS AND CREATING CLASS LABEL
 
 #boxplot of distrubution of data
 names = c("overall","helpful_num","helpful_denom")
 newplot <- boxplot(newdf$overall, newdf$helpful_num, newdf$helpful_denom, names=names)
 newplot
 
-#decided to only use records where the amount of raters (ie. denominator column) is more than 10 so that
+#we will only use records where the amount of raters (ie. denominator column) is more than 10 so that
 #we don't artifically rate "helpful" reviews as non-helpful just because they are not rated by people.
 #saving this to new dataframe which we will use going forward
 ten_newdf <- newdf[which(newdf[,2]>10),]
