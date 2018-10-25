@@ -20,7 +20,7 @@
 #note: original dataset is not in strict json see python code to turn the data set into strict json
 
 #uploading json new_reviews into data frame 
-json_reviews_amazon <- jsonlite::stream_in(file("/Users/annagebre/new_reviews_beauty.json"))
+json_reviews_amazon <- jsonlite::stream_in(file("new_reviews_beauty.json"))
 
 #check datatypes of attributes of eview data
 sapply(json_reviews_amazon, class)
