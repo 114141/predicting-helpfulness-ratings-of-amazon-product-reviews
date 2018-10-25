@@ -90,7 +90,7 @@ counthelpful
 #using corrplot() to visualize correlation
 subsetforcor <- ten_newdf[c(1,2,4,5)]
 corrplot(cor(subsetforcor), method="color")
-#There is small correlation between the 'helpful' rating and our score.
+#There is a small correlation between the 'helpful' rating and our score.
 
 
 
