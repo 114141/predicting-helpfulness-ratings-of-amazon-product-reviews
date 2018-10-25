@@ -20,6 +20,8 @@
 
 #READING DATA INTO R
 
+#original data set found at: "snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews_Beauty.json.gz"
+
 #note: original dataset is not in strict json see file "convert_reviews.py" to turn the data set into strict json which was done
 #initially and which created the file "new_reviews_beauty.json"
 
