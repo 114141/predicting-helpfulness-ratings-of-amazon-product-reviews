@@ -25,7 +25,7 @@ json_reviews_amazon <- jsonlite::stream_in(file("new_reviews_beauty.json"))
 #check datatypes of attributes of eview data
 sapply(json_reviews_amazon, class)
 
-#checking to examine first like (note delete "3" to show 6 rows instead))
+#checking to examine first like (shows first "3" rows)
 head(json_reviews_amazon, 3)
 
 #subsetting the variables we are going to use in our model - "helpful", "reviewtext" and "overall"
