@@ -8,6 +8,11 @@
 #install.packages("ggplot2")
 #install.packages("corrplot")
 #install.packages("plyr")
+#install.packages("tm")
+#install.packages("tidytext")
+#install.packages("tidyverse")
+#install.packages("SnowballC")
+#install.packages("dplyr")
 #library(stringr)
 #library(tidyr)
 #library(rjson)
@@ -17,6 +22,11 @@
 #library(ggplot2)
 #library(corrlot)
 #library(plyr)
+#library(tm)
+#library(tidytext)
+#library(tidyverse)
+#library(SnowballC)
+#library(dplyr)
 
 #READING DATA INTO R
 
