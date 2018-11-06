@@ -147,7 +147,7 @@ inspect(review_doctm[305:310, 305:310])
 
 #the sparsity is very high. we will remove low frequency words
 #as they are possibly typos or otherwise uninteresting
-review_doctm = removeSparseTerms(review_doctm, 0.98)
+review_doctm <- removeSparseTerms(review_doctm, 0.98)
 review_doctm
 
 
@@ -160,7 +160,7 @@ reviewdoctm_tfidf <- DocumentTermMatrix(review_corpus, control = list(weighting 
 #this process is noting that there are empty reviews (ie. document) even though they did not come up as empty in preprocess
 #need to recheck
 #now creating tf-idf scores
-reviewdoctm_tfidf = removeSparseTerms(reviewdoctm_tfidf, 0.94)
+reviewdoctm_tfidf <- removeSparseTerms(reviewdoctm_tfidf, 0.94)
 reviewdoctm_tfidf
 
 #checking the first document
@@ -183,14 +183,14 @@ head(ten_newdf$tfidf)
 
 #spliting train and testing sets
 trainrows <- sample(nrow(ten_newdf),nrow(ten_newdf)*0.80)
-ten_newdf.train = ten_newdf[trainrows,]
-ten_newdf.test = ten_newdf[-trainrows,]
+ten_newdf.train <- ten_newdf[trainrows,]
+ten_newdf.test <- ten_newdf[-trainrows,]
 
 #logistic regression model
-ten_newdf.glm = glm(helpful~ ., family = "binomial", data=ten_newdf.train, maxit = 100); 
+ten_newdf.glm <- glm(helpful~ ., family = "binomial", data=ten_newdf.train, maxit = 100); 
 
 #evaluate logistic regression model
-predict_glm = as.numeric(predict(ten_newdf.glm, ten_newdf.test, type="response") > 0.5)
+predict_glm <- as.numeric(predict(ten_newdf.glm, ten_newdf.test, type="response") > 0.5)
 table(ten_newdf.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 
 
