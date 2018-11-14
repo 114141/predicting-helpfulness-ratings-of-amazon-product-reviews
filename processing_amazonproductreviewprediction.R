@@ -172,13 +172,20 @@ n_reviews <- cbind(reviews, as.matrix(reviewdoctm_tfidf))
 head(n_reviews)
 
 
-#adding the tfidf column to the working dataset
+#adding the tfidf column to the working dataset - adding as matrix then convert to 
+#data frame
 ten_newdf$tfidf <- as.matrix(reviewdoctm_tfidf)
+ten_newdf$tfidf <- as.data.frame(ten_newdf$tfidf)
 
 #checking class of new column
 sapply(ten_newdf, class)
 #checking first few rows of new tfidf column
 head(ten_newdf$tfidf)
+#checking dataframe
+str(ten_newdf)
+
+#checking how many terms (ie. rows) are in the tfidf column
+ncol(ten_newdf$tfidf)
 
 
 #spliting train and testing sets
