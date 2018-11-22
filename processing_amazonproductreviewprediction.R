@@ -98,7 +98,6 @@ ten_newdf
 ishelpful = 0.6
 ten_newdf$helpful <- ifelse((ten_newdf$helpful_num/ten_newdf$helpful_denom)>ishelpful, 1, 0)
 
-
 #checking to see how imbalanced the dataset is. it's really impalanced towards "helpful" reviews
 counthelpful <- count(ten_newdf, "helpful")
 counthelpful
@@ -139,69 +138,71 @@ inspect(review_corpus[1])
 review_doctm <- DocumentTermMatrix(review_corpus)
 review_doctm
 
-
 #inspecting five rows of matrix
 inspect(review_doctm[305:310, 305:310])
-
-
 
 #the sparsity is very high. we will remove low frequency words
 #as they are possibly typos or otherwise uninteresting
 review_doctm <- removeSparseTerms(review_doctm, 0.98)
 review_doctm
 
-
 #inspecting five rows of matrix again
 inspect(review_doctm[305:310, 305:310])
 
-
 #finding tf-idf which finds the relative importance of a word to a document.
 reviewdoctm_tfidf <- DocumentTermMatrix(review_corpus, control = list(weighting = weightTfIdf))
-#this process is noting that there are empty reviews (ie. document) even though they did not come up as empty in preprocess
-#need to recheck
 #now creating tf-idf scores
-reviewdoctm_tfidf <- removeSparseTerms(reviewdoctm_tfidf, 0.94)
+reviewdoctm_tfidf = removeSparseTerms(reviewdoctm_tfidf, 0.98)
+#note have increased threshhold to bring in more terms
 reviewdoctm_tfidf
 
 #checking the first document
 inspect(reviewdoctm_tfidf[1,1:15])
 
+#converting to dataframe
+tfidfam <- as.matrix(reviewdoctm_tfidf)
+tfidfdf <- as.data.frame(tfidfam)
+#checking out how many terms are in the dataframe
+ncol(tfidfdf)
+#there are 545 terms
+
 #creating new dataframe for reviews and tf-idf to inspect before adding as feature to full dataset
-n_reviews <- cbind(reviews, as.matrix(reviewdoctm_tfidf))
-#view sample of new datafram
+n_reviews <- cbind(reviews, tfidf)
+#view sample of new dataframe
 head(n_reviews)
 
-
-#adding the tfidf column to the working dataset - adding as matrix then convert to 
-#data frame
-ten_newdf$tfidf <- as.matrix(reviewdoctm_tfidf)
-ten_newdf$tfidf <- as.data.frame(ten_newdf$tfidf)
+#binding tfidfdf with working dataframe
+combineddf <- cbind(ten_newdf, tfidfdf)
 
 #checking class of new column
-sapply(ten_newdf, class)
-#checking first few rows of new tfidf column
-head(ten_newdf$tfidf)
-#checking dataframe
-str(ten_newdf)
+sapply(combineddf, class)
 
-#checking how many terms (ie. rows) are in the tfidf column
-ncol(ten_newdf$tfidf)
+#finding the top words - takes lower frequency bound as argument
+toptfidf <- findFreqTerms(reviewdoctm_tfidf, 100)
+toptfidf
 
+#LOGISTIC REGRESSION MODEL
 
-#spliting train and testing sets
-trainrows <- sample(nrow(ten_newdf),nrow(ten_newdf)*0.80)
-ten_newdf.train <- ten_newdf[trainrows,]
-ten_newdf.test <- ten_newdf[-trainrows,]
+#subset just terms, helpful and wordcount columns
+justwords <- combineddf[c(5:551)] 
 
-#logistic regression model
-ten_newdf.glm <- glm(helpful~ ., family = "binomial", data=ten_newdf.train, maxit = 100); 
+#spliting train and testing sets for just words and helpful df
+trainrows <- sample(nrow(justwords),nrow(justwords)*0.80)
+justwords.train = justwords[trainrows,]
+justwords.test = justwords[-trainrows,]
 
-#evaluate logistic regression model
-predict_glm <- as.numeric(predict(ten_newdf.glm, ten_newdf.test, type="response") > 0.5)
-table(ten_newdf.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
+#building model
+justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=justwords.train, control = list(maxit = 100))
 
+#evaluate logistic regression model using confusion matrix
+predict_glm = as.numeric(predict(justwords.glm, justwords.test, type="response") > 0.5)
+table(justwords.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 
-
+#finding accuracy of new model
+classiferror <- mean(predict_glm != justwords.test$helpful)
+accu <- paste('Accuracy',1-classiferror)
+accu
+#"Accuracy 0.883748317631225"
 
 
 
