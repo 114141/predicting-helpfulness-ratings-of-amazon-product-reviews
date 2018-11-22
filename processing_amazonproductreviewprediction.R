@@ -195,7 +195,7 @@ justwords.test = justwords[-trainrows,]
 justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=justwords.train, control = list(maxit = 100))
 
 #evaluate logistic regression model using confusion matrix
-predict_glm = as.numeric(predict(justwords.glm, justwords.test, type="response") > 0.5)
+predict_glm <- as.numeric(predict(justwords.glm, justwords.test, type="response") > 0.5)
 table(justwords.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 
 #finding accuracy of new model
