@@ -332,25 +332,52 @@ indiv
 #coordinates of individuals
 head(indiv$coord)
 
+#these are the active variables with the highest cos2
+fviz_pca_var(pca.train, repel = TRUE, radient.cols = c("white", "blue", "red"), select.var= list(cos2 = 30))
+#the variables listed are and what we will reduce our variables down to:
+#"overall"
+#"moistur"
+#"sensit"
+#"dri"
+#"cur"
+#"blow"
+#"straight"
+#"hair"
+#"curl"
+#"style"
+#"dryer"
+#"heat"
+#"iron"
+#"flat"
+#"item"
+#"order"
+#"seller"
+#"return"
+#"receiv"
+#"amazon"
+#"compani"
+#"money"
+#"wrinkle"
+#"notic"
+#"use"
+#"face"
+#"week"
+#"cream"
+#"skin"
+#"acn"
+
+
+#CUTTING DOWN FEATURES 
+#reducing to 30 variables including the class label in order to run logistic regression
+
+#subsetting columns 
+newfeat1 <- combineddf.train[, (names(combineddf.train) %in% c("helpful","overall", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
+                                                               "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn"))]
 
 
 #LOGISTIC REGRESSION
 
-#subset just words and helpful column - also wordcount, denominator
-justwords <- combineddf[c(2,5:551)] #note! i have consistently changed this!!
-#will not match with below models as this log reg is done w/o denom.
-#again above has changed to include helpful - change pca accordingly
-
-#spliting train and testing sets for just words, denom and helpful df
-trainrows <- sample(nrow(justwords),nrow(justwords)*0.80)
-justwords.train = justwords[trainrows,]
-justwords.test = justwords[-trainrows,]
-
-
-justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=justwords.train, control = list(maxit = 100))
-#note received following error: Warning message: glm.fit: fitted probabilities numerically 0 or 1 occurred 
-# this warning only occurs when helpful denom is in model
-
+justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=newfeat1, control = list(maxit = 100))
 
 #evaluate logistic regression model
 predict_glm <- as.numeric(predict(justwords.glm, justwords.test, type="response") > 0.5)
@@ -360,15 +387,5 @@ table(justwords.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 classiferror <- mean(predict_glm != justwords.test$helpful)
 accu <- paste('Accuracy',1-classiferror)
 accu
-
-
-
-
-
-
-
-
-
-
-
+#Accuracy is 0.879962987886945
 
