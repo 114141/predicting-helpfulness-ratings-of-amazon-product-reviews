@@ -124,7 +124,7 @@ names = c("overall","num","denom")
 ten_newplot <- boxplot(ten_newdf$overall, ten_newdf$helpful_num, ten_newdf$helpful_denom, names=names, las=3)
 ten_newplot
 
-#adding a new column for word count on prof's advice
+#adding a new column for word count
 #nchar from stringr package
 ten_newdf$reviewWordCount <- nchar(gsub('[^ ]+', '',ten_newdf$reviewText))+1
 
@@ -208,7 +208,7 @@ reviewdoctm_tfidf <- DocumentTermMatrix(review_corpus, control = list(weighting 
 reviewdoctm_tfidf = removeSparseTerms(reviewdoctm_tfidf, 0.98)
 #prof karim comment - increase threshhold to bring in more terms
 reviewdoctm_tfidf
-#sparsity is now 94% which suitable for our purposes
+#sparsity is now 94% which is suitable for our purposes
 
 #checking the first document
 inspect(reviewdoctm_tfidf[1,1:15])
@@ -232,15 +232,6 @@ combineddf <- cbind(ten_newdf, tfidfdf)
 
 #checking class of new column
 sapply(combineddf, class)
-
-#this section a ??? - freq of words imp for our purposes
-#finding the top words - function takes lower freq bound as argument - from tfidf
-#toptfidf <- findFreqTerms(reviewdoctm_tfidf, 100)
-#toptfidf
-
-#topdoctm <- findFreqTerms(review_doctm, 100)
-#topdoctm 
-#from doc term freq matrix
 
 #ranking of terms
 wordsdecre <- data.frame(sort(colSums(as.matrix(reviewdoctm_tfidf)), decreasing=TRUE))
@@ -288,7 +279,7 @@ plot(cumsum(pca.train$sdev^2/sum(pca.train$sdev^2)))
 
 #FURTHER ANALYSIS OF PRINCIPAL COMPONENTS FOR FEATURE SELECTION
 
-# Extract the results for variables and individuals
+#extract the results for variables and individuals
 get_pca(pca.train, element = c("var", "ind"))
 
 #extracting the result of variables
@@ -324,7 +315,7 @@ fviz_contrib(pca.train, choice = "var", axes = 5, top = 50)
 fviz_contrib(pca.train, choice = "var", axes = 1:4, top = 50)
 
 #we see her that "hair", "overall, "skin" are the most important and then 
-#the graph tapers off too other terms
+#the graph tapers off to other terms
 
 #another visualization where "skin", "overall" and "hair" standout
 
@@ -334,7 +325,7 @@ fviz_mca_var(pca.train, col.var = "contrib",
             ggtheme = theme_minimal()
 )
 
-#extract to the results for individuals
+#extract the results for individuals
 indiv <- get_pca_ind(pca.train)
 indiv
 
