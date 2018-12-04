@@ -13,20 +13,41 @@
 #install.packages("tidyverse")
 #install.packages("SnowballC")
 #install.packages("dplyr")
-#library(stringr)
-#library(tidyr)
-#library(rjson)
-#library(jsonlite)
-#library(data.table)
-#library(psych)
-#library(ggplot2)
-#library(corrlot)
-#library(plyr)
-#library(tm)
-#library(tidytext)
-#library(tidyverse)
-#library(SnowballC)
-#library(dplyr)
+#install.packages("wordcloud")
+#install.packages("class")
+#install.packages("e1071")
+#install.packages("stats")
+#install.packages("resample")
+#install.packages("MASS")
+#install.packages("devtools")
+#install_github(factoextra) #???or did you get it from search
+#install.packages(FactoMineR) #wont install
+library(stringr)
+library(tidyr)
+library(rjson)
+library(jsonlite)
+library(data.table)
+library(psych)
+library(ggplot2)
+library(corrplot)
+library(tm)
+library(plyr)
+library(tidytext)
+library(tidyverse)
+library(SnowballC)
+library(dplyr)
+library(wordcloud)
+library(class)
+library(e1071)
+library(stats)
+library(resample)
+library(MASS)
+library(devtools)
+library(factoextra)
+#library(FactoMineR) #wont install
+
+
+
 
 #READING DATA INTO R
 
@@ -44,7 +65,7 @@ sapply(json_reviews_amazon, class)
 #checking to examine first like (shows first "3" rows)
 head(json_reviews_amazon, 3)
 
-#FEATURE SELECTION AND CREATING NEW FEATURES
+#CREATING NEW FEATURES
 
 #subsetting the variables we are going to use in our model - "helpful", "reviewtext" and "overall"
 newdf <- json_reviews_amazon[c(4, 6:7)]
@@ -65,12 +86,13 @@ newdf$helpful_num = gsub("c","",newdf$helpful_num)
 newdf$helpful_num = gsub("[(]","",newdf$helpful_num)
 newdf$helpful_denom = gsub("[)]","",newdf$helpful_denom)
 
+
 #checking if there are any missing values
-missing <- newdf[!complete.cases(newdf),]
+missing <- newdf[!complete.cases(newdf), ]
 #there are no mising values
 missing
 
-#check classes again
+#check classes again for data types that we might need to change
 sapply(newdf, class)
 
 #since helpful_num and helpful_denom are char change them to numeric
@@ -84,8 +106,8 @@ describe(newdf)
 #EXPLORATORY DATA ANALYIS AND CREATING A CLASS LABEL
 
 #boxplot of distrubution of data
-names = c("overall","helpful_num","helpful_denom")
-newplot <- boxplot(newdf$overall, newdf$helpful_num, newdf$helpful_denom, names=names)
+names = c("overall","num","denom")
+newplot <- boxplot(newdf$overall, newdf$helpful_num, newdf$helpful_denom, names=names, las=3)
 newplot
 
 #we will only use records where the amount of raters (ie. denominator column) is more than 10 so that
@@ -94,25 +116,53 @@ newplot
 ten_newdf <- newdf[which(newdf[,2]>10),]
 ten_newdf
 
+#check to missing values
+missing_ten <- ten_newdf[!complete.cases(ten_newdf), ]
+#there are no mising values
+missing_ten
+
+#new plot after taking on values more than 10 
+names = c("overall","num","denom")
+ten_newplot <- boxplot(ten_newdf$overall, ten_newdf$helpful_num, ten_newdf$helpful_denom, names=names, las=3)
+ten_newplot
+
+#adding a new column for word count on prof's advice
+#nchar from stringr package
+ten_newdf$reviewWordCount <- nchar(gsub('[^ ]+', '',ten_newdf$reviewText))+1
+
 #now creating a new feature - ie. the class label for "helpful".
 ishelpful = 0.6
 ten_newdf$helpful <- ifelse((ten_newdf$helpful_num/ten_newdf$helpful_denom)>ishelpful, 1, 0)
 
 #checking to see how imbalanced the dataset is. it's really impalanced towards "helpful" reviews
-counthelpful <- count(ten_newdf, "helpful")
-counthelpful
+counthelpful <- count(ten_newdf, vars = helpful)
+#0 - 7226
+#1 - 52213
+7226/52213 = 0.1383947
+0.1383947 * 100
+#unhelpful reviews makes up 13.83947% of data set
+100 - 13.83947 
+#helpful reviews makeup 86.16053% of data set
+#perhaps we will downsample later or use a cost function in our models
+
 
 #using corrplot() to visualize correlation
-subsetforcor <- ten_newdf[c(1,2,4,5)]
+subsetforcor <- ten_newdf[c(1,2,4,5,6)]
 corrplot(cor(subsetforcor), method="color")
-#There is a small correlation between the 'helpful' rating and our score.
+#There is a small correlation between the 'helpful' rating and our 
+# overall score - ie. the star rating that a review has given the product.
 
-#plotting histograms
+#plotting histograms of overall score
 overall <- ten_newdf$overall
 hist(overall)
+#most ratings are positive - many are five stars.
+
+
+##TEXT MINING##
 
 #cleaning text as a part of preprocess (using tm package)
 reviews <- ten_newdf$reviewText
+
 
 review_corpus <- Corpus(VectorSource(reviews))
 
@@ -141,60 +191,179 @@ review_doctm
 #inspecting five rows of matrix
 inspect(review_doctm[305:310, 305:310])
 
+
 #the sparsity is very high. we will remove low frequency words
 #as they are possibly typos or otherwise uninteresting
-review_doctm <- removeSparseTerms(review_doctm, 0.98)
+review_doctm = removeSparseTerms(review_doctm, 0.98)
 review_doctm
+
 
 #inspecting five rows of matrix again
 inspect(review_doctm[305:310, 305:310])
 
+
 #finding tf-idf which finds the relative importance of a word to a document.
 reviewdoctm_tfidf <- DocumentTermMatrix(review_corpus, control = list(weighting = weightTfIdf))
-#now creating tf-idf scores
+#this process is noting that there are empty reviews (ie. documents) 
+#this is likely that documents have been dropped when we cleaned text 
+#(i.e. removing stop words, etc)
 reviewdoctm_tfidf = removeSparseTerms(reviewdoctm_tfidf, 0.98)
-#note have increased threshhold to bring in more terms
+#prof karim comment - increase threshhold to bring in more terms
 reviewdoctm_tfidf
+#sparsity is now 94% which suitable for our purposes
 
 #checking the first document
 inspect(reviewdoctm_tfidf[1,1:15])
 
-#converting to dataframe
+
+#converting doctm_tfidf matrix to dataframe
 tfidfam <- as.matrix(reviewdoctm_tfidf)
 tfidfdf <- as.data.frame(tfidfam)
-#checking out how many terms are in the dataframe
+#checking out how many terms in the dataframe 
+#(i.e. how many words we have)
 ncol(tfidfdf)
-#there are 545 terms
 
 #creating new dataframe for reviews and tf-idf to inspect before adding as feature to full dataset
 n_reviews <- cbind(reviews, tfidf)
-#view sample of new dataframe
+#view sample of new datafram
 head(n_reviews)
 
-#binding tfidfdf with working dataframe
+
+#binding tfidfdf w working dataframe
 combineddf <- cbind(ten_newdf, tfidfdf)
 
 #checking class of new column
 sapply(combineddf, class)
 
-#finding the top words - takes lower frequency bound as argument
-toptfidf <- findFreqTerms(reviewdoctm_tfidf, 100)
-toptfidf
+#this section a ??? - freq of words imp for our purposes
+#finding the top words - function takes lower freq bound as argument - from tfidf
+#toptfidf <- findFreqTerms(reviewdoctm_tfidf, 100)
+#toptfidf
 
-#LOGISTIC REGRESSION MODEL
+#topdoctm <- findFreqTerms(review_doctm, 100)
+#topdoctm 
+#from doc term freq matrix
 
-#subset just terms, helpful and wordcount columns
-justwords <- combineddf[c(5:551)] 
+#ranking of terms
+wordsdecre <- data.frame(sort(colSums(as.matrix(reviewdoctm_tfidf)), decreasing=TRUE))
+wordsdecre #decreasing list of tfidf words
+#now making wordcloud
+wordcloud(rownames(wordsdecre), wordsdecre[,1], max.words=60, colors=brewer.pal(4, "Dark2"))
+#word cloud shows that hair, product, skin, use are high tf-idf terms
 
-#spliting train and testing sets for just words and helpful df
+
+#SPLITTING TRAIN AND TEST DATA SETS FOR MORE PROCESSING#
+
+trainrows <- sample(nrow(combineddf),nrow(combineddf)*0.80)
+combineddf.train = combineddf[trainrows,]
+combineddf.test = combineddf[-trainrows,]
+#training on 80% of dataset, and testing on remaining 20%
+
+#PCA ON TRAINING DATA
+
+pcadata.train <- combineddf.train[c(2,4:5,7:551)] 
+#including the variables: denominator, wordcount, overall, and all terms
+
+#argument scale - the variable standard deviations (the scaling applied to each variable) ie. normalized
+pca.train <- prcomp(pcadata.train , scale = T)
+
+#checking prcomp attributes - sdev, rotation, center, x
+names(pca.train)
+
+#show summary
+summary(pca.train)
+
+#In the results or prcomp, you can see the principal components (pca.train$x), 
+#the eigenvalues (pca.train$sdev) give info on the magnitude of 
+#each principal component, and the loadings (pca.train$rotation). 
+
+pca.train$sdev
+length(pca.train$sdev)
+pca.train$rotation
+dim(pca.train$rotation)
+pca.train$x
+dim(pca.train$x)
+
+#squaring the eigenvalues to the get variance explained by principal comps
+plot(cumsum(pca.train$sdev^2/sum(pca.train$sdev^2)))
+
+
+#FURTHER ANALYSIS OF PRINCIPAL COMPONENTS FOR FEATURE SELECTION
+
+# Extract the results for variables and individuals
+get_pca(pca.train, element = c("var", "ind"))
+
+#extracting the result of variables
+var <- get_pca_var(pca.train)
+var
+
+#coordinates of variables
+head(var$coord)
+
+#visualization of the variables
+fviz_pca_var(pca.train)
+#they overlap a lot here, but skin, overall, hair, product jump out
+
+#plot of pca variances
+screeplot(pca.train,type="line",main="Scree Plot")
+
+#contributions of variables to PC1:
+fviz_contrib(pca.train, choice = "var", axes = 1, top = 50)
+
+#contributions of variables to PC2:
+fviz_contrib(pca.train, choice = "var", axes = 2, top = 20)
+
+#contributions of variables to PC3:
+fviz_contrib(pca.train, choice = "var", axes = 3, top = 50)
+
+#contributions of variables to PC4:
+fviz_contrib(pca.train, choice = "var", axes = 4, top = 50)
+
+#contributions of variables to PC5:
+fviz_contrib(pca.train, choice = "var", axes = 5, top = 50)
+
+#now checking PC's 1 to 4 because they explain the most variance
+fviz_contrib(pca.train, choice = "var", axes = 1:4, top = 50)
+
+#we see her that "hair", "overall, "skin" are the most important and then 
+#the graph tapers off too other terms
+
+#another visualization where "skin", "overall" and "hair" standout
+
+fviz_mca_var(pca.train, col.var = "contrib",
+            gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+             # avoid text overlapping (slow)
+            ggtheme = theme_minimal()
+)
+
+#extract to the results for individuals
+indiv <- get_pca_ind(pca.train)
+indiv
+
+#coordinates of individuals
+head(indiv$coord)
+
+
+
+#LOGISTIC REGRESSION
+
+#subset just words and helpful column - also wordcount, denominator
+justwords <- combineddf[c(2,5:551)] #note! i have consistently changed this!!
+#will not match with below models as this log reg is done w/o denom.
+#again above has changed to include helpful - change pca accordingly
+
+#spliting train and testing sets for just words, denom and helpful df
 trainrows <- sample(nrow(justwords),nrow(justwords)*0.80)
 justwords.train = justwords[trainrows,]
 justwords.test = justwords[-trainrows,]
 
-#building model
-justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=justwords.train, control = list(maxit = 100))
 
-#evaluate logistic regression model using confusion matrix
+justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=justwords.train, control = list(maxit = 100))
+#note received following error: Warning message: glm.fit: fitted probabilities numerically 0 or 1 occurred 
+# this warning only occurs when helpful denom is in model
+
+
+#evaluate logistic regression model
 predict_glm <- as.numeric(predict(justwords.glm, justwords.test, type="response") > 0.5)
 table(justwords.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 
@@ -202,9 +371,6 @@ table(justwords.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 classiferror <- mean(predict_glm != justwords.test$helpful)
 accu <- paste('Accuracy',1-classiferror)
 accu
-#"Accuracy 0.883748317631225"
-
-
 
 
 
