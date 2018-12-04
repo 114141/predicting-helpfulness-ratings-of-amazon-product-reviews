@@ -20,8 +20,7 @@
 #install.packages("resample")
 #install.packages("MASS")
 #install.packages("devtools")
-#install_github(factoextra) #???or did you get it from search
-#install.packages(FactoMineR) #wont install
+#install_github("factoextra") 
 library(stringr)
 library(tidyr)
 library(rjson)
@@ -44,7 +43,6 @@ library(resample)
 library(MASS)
 library(devtools)
 library(factoextra)
-#library(FactoMineR) #wont install
 
 
 
