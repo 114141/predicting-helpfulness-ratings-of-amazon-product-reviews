@@ -420,3 +420,22 @@ nb.classiferror <- mean(nb_pred != normed.test$helpful)
 nb.accu <- paste('Accuracy',1-nb.classiferror)
 nb.accu
 #"Accuracy 0.775487886944818"
+
+
+#RANDOM FOREST
+
+#creating random forest model
+#randomForest will default to classification or regression depending on the variable.
+#we change helpful to as factor to accommodate
+rf <- randomForest(as.factor(helpful)~., data = normed.train,  ntree = 300, mtry = 20, importance = TRUE)
+#call model
+rf
+#high computation time. however this allows us one of the lower errowr rate for 
+#"not helpful" classification even though it is still very high at 0.85692122
+#Call:
+#OOB estimate of  error rate: 13.38%
+#Confusion matrix:
+#0     1 class.error
+#0  830  4971  0.85692122
+#1 1390 40360  0.03329341
+
