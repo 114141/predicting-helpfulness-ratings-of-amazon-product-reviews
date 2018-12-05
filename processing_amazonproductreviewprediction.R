@@ -435,7 +435,7 @@ rf
 #Call:
 #OOB estimate of  error rate: 13.38%
 #Confusion matrix:
-#0     1 class.error
+#    0     1   class.error
 #0  830  4971  0.85692122
 #1 1390 40360  0.03329341
 
