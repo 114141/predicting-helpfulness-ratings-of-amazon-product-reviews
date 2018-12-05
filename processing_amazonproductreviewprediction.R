@@ -406,3 +406,17 @@ classiferror <- mean(predict_glm != normed.test$helpful)
 accu <- paste('Accuracy',1-classiferror)
 accu
 #Accuracy 0.88164535666218
+
+
+#NAIVE BAYES
+
+#convert helpful to as.factor as helpful was numeric in train dataset
+nb <- naiveBayes(as.factor(helpful)~., data=normed.train)
+nb_pred <- predict(nb, normed.test, type="class")
+table(nb_pred, normed.test$helpful, dnn=c("Prediction","Actual"))
+
+#finding accuracy of new model
+nb.classiferror <- mean(nb_pred != normed.test$helpful)
+nb.accu <- paste('Accuracy',1-nb.classiferror)
+nb.accu
+#"Accuracy 0.775487886944818"
