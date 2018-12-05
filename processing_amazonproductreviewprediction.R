@@ -375,17 +375,34 @@ newfeat1 <- combineddf.train[, (names(combineddf.train) %in% c("helpful","overal
                                                                "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn"))]
 
 
+#NORMALIZE DATA
+
+#creating normalize function
+normalform <- function(x) {(x - min(x, na.rm=TRUE))/(max(x,na.rm=TRUE) - min(x, na.rm=TRUE))}
+
+#useing lapply to apply normalform() to every column in train data
+normed.train <- as.data.frame(lapply(newfeat1, normalform))
+#check that every that the values are within 0 to 1
+lapply(normed.train, range)
+
+
+#useing lapply to apply normalform() to every column in a test data
+#first taking only relevant vars
+nowt.test <- combineddf.test[c(1:2,4:551)] 
+normed.test <- as.data.frame(lapply(nowt.test, normalform))
+#check that every that the values are withing 0 to 1
+lapply(normed.test, range)
+
 #LOGISTIC REGRESSION
 
-justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=newfeat1, control = list(maxit = 100))
+justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=normed, control = list(maxit = 100))
 
 #evaluate logistic regression model
-predict_glm <- as.numeric(predict(justwords.glm, justwords.test, type="response") > 0.5)
-table(justwords.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
+predict_glm <- as.numeric(predict(justwords.glm, normed.test, type="response") > 0.5)
+table(normed.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 
 #finding accuracy of new model
-classiferror <- mean(predict_glm != justwords.test$helpful)
+classiferror <- mean(predict_glm != normed.test$helpful)
 accu <- paste('Accuracy',1-classiferror)
 accu
-#Accuracy is 0.879962987886945
-
+#Accuracy 0.88164535666218
