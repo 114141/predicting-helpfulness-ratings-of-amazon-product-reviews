@@ -238,7 +238,7 @@ wordsdecre <- data.frame(sort(colSums(as.matrix(reviewdoctm_tfidf)), decreasing=
 wordsdecre #decreasing list of tfidf words
 #now making wordcloud
 wordcloud(rownames(wordsdecre), wordsdecre[,1], max.words=60, colors=brewer.pal(4, "Dark2"))
-#word cloud shows that hair, product, skin, use are high tf-idf terms
+#word cloud shows that hair, product, skin, use are significant terms
 
 
 #SPLITTING TRAIN AND TEST DATA SETS FOR MORE PROCESSING#
