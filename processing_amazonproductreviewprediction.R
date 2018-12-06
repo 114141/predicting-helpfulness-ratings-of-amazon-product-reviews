@@ -440,3 +440,24 @@ rf
 #1 1390 40360  0.03329341
 #Accuracy 0.866227839
 
+#creating a model using downsampling technique of helpful class
+ctrl <- trainControl(method = "repeatedcv", 
+                     number = 2, 
+                     repeats = 2, 
+                     verboseIter = FALSE,
+                     sampling = "down")
+
+
+model_rf_under <- caret::train(helpful ~ .,
+                                data = normed.testfactor,
+                                method = "rf",
+                                trControl = ctrl)
+
+#evaluating downsampled random forest model
+testforest = predict(model_rf_under, newdata=normed.testfactor)
+#confusion matrix downsampled model
+table(testforest, normed.testfactor$helpful) 
+#testforest     0     1
+           0  1425   212
+           1     0 10251
+
