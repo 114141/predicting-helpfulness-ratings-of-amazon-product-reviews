@@ -509,12 +509,15 @@ model_rf_under <- caret::train(helpful ~ .,
 #evaluating downsampled random forest model
 testforest = predict(model_rf_under, newdata=normed.testfactor)
 #confusion matrix downsampled model
-table(testforest, normed.testfactor$helpful) 
-#testforest     0     1
-           0  1425   212
-           1     0 10251
+table(testforest, normed.testfactor$helpful, dnn=c("Observed","Predicted"))
+#testforest     
+            Predicted
+Observed     0     1
+0           1425   203
+1            0    10260
+
 #when downsampled we're much better able to predict reviews that are not helpful
-#true negative rate - 87%
-rf_accu <- (10251 + 1425)/(10251 + 212 + 0 + 1425)
+#True Negative Rate = TN/TN+FP = 1425/1425 + 203 = 0.8753071
+rf_accu <- (10260 + 1425)/(10260 + 203 + 0 + 1425)
 rf_accu
-#Accuracy 0.9821669
+#Accuracy 0.982924
