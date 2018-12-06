@@ -398,10 +398,30 @@ fviz_pca_var(pca.train, repel = TRUE, radient.cols = c("white", "blue", "red"), 
 #"cream"
 #"skin"
 #"acn"
+#"thick"
 
 
-#CUTTING DOWN FEATURES 
-#reducing to 30 variables including the class label in order to run logistic regression
+#REDUCING FEATURES 
+#using only features from above list of terms - training dataframe below
+#as well as words plus class label
+newfeat1 <- combineddf.train[, (names(combineddf.train) %in% c("helpful","overall", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
+                                                               "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick"))]
+
+#will also divide the combineddf.test dataframe in the same way 
+newfeat1.test <- combineddf.test[, (names(combineddf.train) %in% c("helpful","overall", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
+                                                                                "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick"))]
+
+
+#WE WILL ALSO DO ANOTHER SEGMENTATION OF JUST THE TFIF SCORES OF TERMS WE CHOSE
+
+#using only word features from above list of terms - training datafram below
+words.train <- combineddf.train[, (names(combineddf.train) %in% c("helpful", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
+                                                               "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick" ))]
+
+#will also divide the combineddf.test dataframe in the same way 
+words.test <- combineddf.test[, (names(combineddf.train) %in% c("helpful", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
+                                                                   "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick"))]
+
 
 #subsetting columns 
 newfeat1 <- combineddf.train[, (names(combineddf.train) %in% c("helpful","overall", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
@@ -438,7 +458,7 @@ table(normed.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 classiferror <- mean(predict_glm != normed.test$helpful)
 accu <- paste('Accuracy',1-classiferror)
 accu
-#Accuracy 0.88164535666218
+#Accuracy 0.881561238223419
 
 
 #NAIVE BAYES
@@ -452,7 +472,7 @@ table(nb_pred, normed.test$helpful, dnn=c("Prediction","Actual"))
 nb.classiferror <- mean(nb_pred != normed.test$helpful)
 nb.accu <- paste('Accuracy',1-nb.classiferror)
 nb.accu
-#"Accuracy 0.775487886944818"
+#"Accuracy 0.775235531628533"
 
 
 #RANDOM FOREST
@@ -473,7 +493,7 @@ rf
 #1 1390 40360  0.03329341
 #Accuracy 0.866227839
 
-#creating a model using downsampling technique of helpful class
+#random Forest Model using downsampling technique of helpful class
 ctrl <- trainControl(method = "repeatedcv", 
                      number = 2, 
                      repeats = 2, 
