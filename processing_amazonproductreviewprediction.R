@@ -460,4 +460,8 @@ table(testforest, normed.testfactor$helpful)
 #testforest     0     1
            0  1425   212
            1     0 10251
-
+#when downsampled we're much better able to predict reviews that are not helpful
+#true negative rate - 87%
+rf_accu <- (10251 + 1425)/(10251 + 212 + 0 + 1425)
+rf_accu
+#Accuracy 0.9821669
