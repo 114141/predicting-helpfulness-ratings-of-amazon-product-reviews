@@ -21,6 +21,7 @@
 #install.packages("MASS")
 #install.packages("devtools")
 #install_github("factoextra") 
+#install.packages("nortest")
 library(stringr)
 library(tidyr)
 library(rjson)
@@ -43,6 +44,7 @@ library(resample)
 library(MASS)
 library(devtools)
 library(factoextra)
+library(nortest)
 
 
 
@@ -154,6 +156,37 @@ corrplot(cor(subsetforcor), method="color")
 overall <- ten_newdf$overall
 hist(overall)
 #most ratings are positive - many are five stars.
+
+#DISTRUBUTION OF ATTRIBUTES
+
+#We cannot use Shapiro test becayse
+#of how big our dataset is so we use
+#Anderson-Darling normality test, which works 
+#for larger sample sizes.
+
+ad.test(ten_newdf$helpful_denom)
+#p-value < 2.2e-16 #we reject null hypothesis 
+#and no significant departure from normality was found
+
+#The test rejects the hypothesis of normality when the p-value 
+#is less than or equal to 0.05. If we failing the normality test we can
+#tate with 95% confidence the data does not fit the normal 
+#distribution. Passing the normality test only allows you to state 
+#no significant departure from normality was found.
+
+ad.test(ten_newdf$helpful_num)
+# p-value < 2.2e-16  #we reject null hypothesis 
+#and no significant departure from normality was found
+
+
+ad.test(ten_newdf$overall)
+# p-value < 2.2e-16  #we reject null hypothesis 
+#and no significant departure from normality was found
+
+
+ad.test(ten_newdf$reviewWordCount)
+# p-value < 2.2e-16  #we reject null hypothesis 
+#and no significant departure from normality was found
 
 
 ##TEXT MINING##
