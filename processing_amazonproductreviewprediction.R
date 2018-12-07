@@ -460,6 +460,34 @@ accu <- paste('Accuracy',1-classiferror)
 accu
 #Accuracy 0.8815612382234192 ie. 88.2%
 
+#A DOWNSAMPLED LOGISTIC REGRESSION
+'%ni%' <- Negate('%in%')  
+#define "not in" func
+options(scipen=999)  
+#prevents printing sci notations.
+
+set.seed(100)
+down.train.lg <- downSample(x = normed.trainfactor[, colnames(normed.trainfactor) %ni% "helpful"],
+                         y = normed.trainfactor$helpful)
+
+table(down.train.lg$Class)
+
+#fitting model
+downsampled.glm <- glm(Class~. ,family=binomial(link='logit'), data=down.train.lg, control = list(maxit = 100))
+
+#summary of model
+summary(downsampled.glm)
+
+#evaluate logistic regression model
+predict_down_glm <- as.numeric(predict(downsampled.glm, normed.test, type="response") > 0.5)
+table(normed.test$helpful,predict_down_glm,dnn=c("Observed","Predicted"))
+
+#finding accuracy of new model
+down_lg_classiferror <- mean(predict_down_glm != normed.test$helpful)
+down_accu <- paste('Accuracy',1-down_lg_classiferror)
+down_accu 
+#"Accuracy 0.739737550471063" - ie. 73.9% 
+
 
 #NAIVE BAYES
 
