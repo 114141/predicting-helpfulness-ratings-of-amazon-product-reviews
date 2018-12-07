@@ -486,7 +486,7 @@ ctrl <- trainControl(method = "repeatedcv",
 
 
 model_rf_under <- caret::train(helpful ~ .,
-                                data = normed.testfactor,
+                                data = normed.trainfactor,
                                 method = "rf",
                                 trControl = ctrl)
 
