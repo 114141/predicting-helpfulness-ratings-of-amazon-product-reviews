@@ -189,7 +189,7 @@ ad.test(ten_newdf$reviewWordCount)
 #and no significant departure from normality was found
 
 
-##TEXT MINING##
+##TEXT MINING
 
 #cleaning text as a part of preprocess (using tm package)
 reviews <- ten_newdf$reviewText
@@ -239,7 +239,6 @@ reviewdoctm_tfidf <- DocumentTermMatrix(review_corpus, control = list(weighting 
 #this is likely that documents have been dropped when we cleaned text 
 #(i.e. removing stop words, etc)
 reviewdoctm_tfidf = removeSparseTerms(reviewdoctm_tfidf, 0.98)
-#prof karim comment - increase threshhold to bring in more terms
 reviewdoctm_tfidf
 #sparsity is now 94% which is suitable for our purposes
 
@@ -259,7 +258,6 @@ n_reviews <- cbind(reviews, tfidf)
 #view sample of new datafram
 head(n_reviews)
 
-
 #binding tfidfdf w working dataframe
 combineddf <- cbind(ten_newdf, tfidfdf)
 
@@ -274,7 +272,7 @@ wordcloud(rownames(wordsdecre), wordsdecre[,1], max.words=60, colors=brewer.pal(
 #word cloud shows that hair, product, skin, use are significant terms
 
 
-#SPLITTING TRAIN AND TEST DATA SETS FOR MORE PROCESSING#
+#SPLITTING TRAIN AND TEST DATA SETS FOR MORE PROCESSING
 
 trainrows <- sample(nrow(combineddf),nrow(combineddf)*0.80)
 combineddf.train = combineddf[trainrows,]
@@ -346,12 +344,10 @@ fviz_contrib(pca.train, choice = "var", axes = 5, top = 50)
 
 #now checking PC's 1 to 4 because they explain the most variance
 fviz_contrib(pca.train, choice = "var", axes = 1:4, top = 50)
-
 #we see her that "hair", "overall, "skin" are the most important and then 
 #the graph tapers off to other terms
 
 #another visualization where "skin", "overall" and "hair" standout
-
 fviz_mca_var(pca.train, col.var = "contrib",
             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
              # avoid text overlapping (slow)
@@ -402,8 +398,7 @@ fviz_pca_var(pca.train, repel = TRUE, radient.cols = c("white", "blue", "red"), 
 
 
 #REDUCING FEATURES 
-#using only features from above list of terms - training dataframe below
-#as well as words plus class label
+#using only features from above list of variables - training dataframe below
 newfeat1 <- combineddf.train[, (names(combineddf.train) %in% c("helpful","overall", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
                                                                "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick"))]
 
@@ -461,15 +456,18 @@ accu
 #Accuracy 0.8815612382234192 ie. 88.2%
 
 #A DOWNSAMPLED LOGISTIC REGRESSION
+
+#defining "not in" func
 '%ni%' <- Negate('%in%')  
-#define "not in" func
-options(scipen=999)  
+
 #prevents printing sci notations.
+options(scipen=999)  
 
 set.seed(100)
 down.train.lg <- downSample(x = normed.trainfactor[, colnames(normed.trainfactor) %ni% "helpful"],
                          y = normed.trainfactor$helpful)
 
+#there are now 5801 reviews for each class
 table(down.train.lg$Class)
 
 #fitting model
@@ -481,6 +479,12 @@ summary(downsampled.glm)
 #evaluate logistic regression model
 predict_down_glm <- as.numeric(predict(downsampled.glm, normed.test, type="response") > 0.5)
 table(normed.test$helpful,predict_down_glm,dnn=c("Observed","Predicted"))
+
+
+#        Predicted
+#Observed    0    1
+#       0 1014  364
+#       1 2730 7780
 
 #finding accuracy of new model
 down_lg_classiferror <- mean(predict_down_glm != normed.test$helpful)
@@ -495,6 +499,11 @@ down_accu
 nb <- naiveBayes(as.factor(helpful)~., data=normed.train)
 nb_pred <- predict(nb, normed.test, type="class")
 table(nb_pred, normed.test$helpful, dnn=c("Prediction","Actual"))
+
+#         Predicted
+#Observed    0    1
+#0          496 1743
+#1          929 8720
 
 #finding accuracy of new model
 nb.classiferror <- mean(nb_pred != normed.test$helpful)
@@ -527,11 +536,30 @@ table(testforest, normed.testfactor$helpful, dnn=c("Observed","Predicted"))
 #Observed    0    1
 #        0 1079 2978
 #        1  346 7485
-#when downsampled we're better able to predict reviews that are not helpful
-#true negative rate - 0.757193
-#TN/TN + FN  
-#1079/(1079 + 346)
+#when downsampled in random forest we were not better able to predict reviews that are not helpful - see below model.
+#true negative rate - 0.2659601 - ie. 26.6%
+#TN/N = 1079/(1079 + 2978)
 
 rf_accu <- (7485 + 1079)/(7485 + 2978 + 346 + 1079)
 rf_accu
 # Accuracy 0.757193 ie. 75.7%
+
+#random forest model without downsampling
+#note: randomForest() will default to classification or regression depending on the variable.
+#we change helpful to as factor to accommodate
+
+rf1 <- randomForest(helpful~., data = normed.trainfactor,  ntree = 100, mtry = 5, importance = TRUE)
+#lowered for computation reasons
+
+testforest_notds = predict(rf1, newdata=normed.testfactor)
+#confusion matrix downsampled model
+table(testforest_notds, normed.testfactor$helpful, dnn=c("Observed","Predicted"))
+
+#            Predicted
+#Observed     0     1
+#0           162   196
+#1           1263 10267
+
+#true neg rate - tn/n 
+#162/(162 + 196) = 45.2% 
+#true neg rate is better than when we downsampled
