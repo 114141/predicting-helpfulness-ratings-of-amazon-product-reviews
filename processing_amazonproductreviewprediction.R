@@ -159,20 +159,19 @@ hist(overall)
 
 #DISTRUBUTION OF ATTRIBUTES
 
-#We cannot use Shapiro test becayse
+#We cannot use Shapiro test because
 #of how big our dataset is so we use
 #Anderson-Darling normality test, which works 
 #for larger sample sizes.
 
 ad.test(ten_newdf$helpful_denom)
-#p-value < 2.2e-16 #we reject null hypothesis 
+#p-value < 2.2e-16 so we reject null hypothesis 
 #and no significant departure from normality was found
 
 #The test rejects the hypothesis of normality when the p-value 
-#is less than or equal to 0.05. If we failing the normality test we can
-#tate with 95% confidence the data does not fit the normal 
-#distribution. Passing the normality test only allows you to state 
-#no significant departure from normality was found.
+#is less than or equal to 0.05. If we fail the normality test we can
+#with 95% confidence believe that the data does not fit the normal 
+#distribution. 
 
 ad.test(ten_newdf$helpful_num)
 # p-value < 2.2e-16  #we reject null hypothesis 
@@ -194,7 +193,7 @@ ad.test(ten_newdf$reviewWordCount)
 #cleaning text as a part of preprocess (using tm package)
 reviews <- ten_newdf$reviewText
 
-
+#reading text into review corpus for processing
 review_corpus <- Corpus(VectorSource(reviews))
 
 #change to lowercase
@@ -293,7 +292,7 @@ names(pca.train)
 #show summary
 summary(pca.train)
 
-#In the results or prcomp, you can see the principal components (pca.train$x), 
+#In the results of prcomp, you can see the principal components (pca.train$x), 
 #the eigenvalues (pca.train$sdev) give info on the magnitude of 
 #each principal component, and the loadings (pca.train$rotation). 
 
@@ -344,13 +343,13 @@ fviz_contrib(pca.train, choice = "var", axes = 5, top = 50)
 
 #now checking PC's 1 to 4 because they explain the most variance
 fviz_contrib(pca.train, choice = "var", axes = 1:4, top = 50)
-#we see her that "hair", "overall, "skin" are the most important and then 
-#the graph tapers off to other terms
+#we see that "hair", "overall, "skin" are the most important and then 
+#the graph tapers off to other variables
 
 #another visualization where "skin", "overall" and "hair" standout
 fviz_mca_var(pca.train, col.var = "contrib",
             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
-             # avoid text overlapping (slow)
+             #too avoid text overlapping (is slow)
             ggtheme = theme_minimal()
 )
 
@@ -363,7 +362,7 @@ head(indiv$coord)
 
 #these are the active variables with the highest cos2
 fviz_pca_var(pca.train, repel = TRUE, radient.cols = c("white", "blue", "red"), select.var= list(cos2 = 30))
-#the variables listed are and what we will reduce our variables down to:
+#the variables listed are what we will reduce our variables down to:
 #"overall"
 #"moistur"
 #"sensit"
@@ -398,22 +397,22 @@ fviz_pca_var(pca.train, repel = TRUE, radient.cols = c("white", "blue", "red"), 
 
 
 #REDUCING FEATURES 
-#using only features from above list of variables - training dataframe below
+#using only features from above list of variables - training dataframe
 newfeat1 <- combineddf.train[, (names(combineddf.train) %in% c("helpful","overall", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
                                                                "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick"))]
 
-#will also divide the combineddf.test dataframe in the same way 
+#will also divide the combineddf.test dataframe in the same way - test datraframe
 newfeat1.test <- combineddf.test[, (names(combineddf.train) %in% c("helpful","overall", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
                                                                                 "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick"))]
 
 
 #WE WILL ALSO DO ANOTHER SEGMENTATION OF JUST THE TFIF SCORES OF TERMS WE CHOSE
 
-#using only word features from above list of terms - training datafram below
+#using only word features from above list of terms - training datafram 
 words.train <- combineddf.train[, (names(combineddf.train) %in% c("helpful", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
                                                                "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick" ))]
 
-#will also divide the combineddf.test dataframe in the same way 
+#will also divide the combineddf.test dataframe in the same way - test dataframe
 words.test <- combineddf.test[, (names(combineddf.train) %in% c("helpful", "moistur", "sensit", "dri","cur","blow","straight", "hair","curl","style","dryer","heat","iron","flat","item","order","seller",
                                                                    "return", "receiv", "amazon", "compani", "money", "wrinkle", "notic", "use", "face", "week", "cream", "skin", "acn", "thick"))]
 
@@ -428,17 +427,17 @@ newfeat1 <- combineddf.train[, (names(combineddf.train) %in% c("helpful","overal
 #creating normalize function
 normalform <- function(x) {(x - min(x, na.rm=TRUE))/(max(x,na.rm=TRUE) - min(x, na.rm=TRUE))}
 
-#useing lapply to apply normalform() to every column in train data
+#using lapply to apply normalform() to every column in train data
 normed.train <- as.data.frame(lapply(newfeat1, normalform))
 #check that every that the values are within 0 to 1
 lapply(normed.train, range)
 
 
-#useing lapply to apply normalform() to every column in a test data
-#first taking only relevant vars
+#using lapply to apply normalform() to every column in a test data
+#first taking only relevant variables
 nowt.test <- combineddf.test[c(1:2,4:551)] 
 normed.test <- as.data.frame(lapply(nowt.test, normalform))
-#check that every that the values are withing 0 to 1
+#check that every value is within 0 to 1
 lapply(normed.test, range)
 
 #LOGISTIC REGRESSION
@@ -449,7 +448,7 @@ justwords.glm <- glm(helpful~. ,family=binomial(link='logit'), data=normed, cont
 predict_glm <- as.numeric(predict(justwords.glm, normed.test, type="response") > 0.5)
 table(normed.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 
-#finding accuracy of new model
+#finding accuracy of model
 classiferror <- mean(predict_glm != normed.test$helpful)
 accu <- paste('Accuracy',1-classiferror)
 accu
@@ -514,7 +513,7 @@ nb.accu
 
 #RANDOM FOREST
 
-#random Forest Model using downsampling technique of helpful class
+#random Forest model using downsampling technique of helpful class
 ctrl <- trainControl(method = "repeatedcv", 
                      number = 2, 
                      repeats = 2, 
