@@ -458,7 +458,7 @@ table(normed.test$helpful,predict_glm,dnn=c("Observed","Predicted"))
 classiferror <- mean(predict_glm != normed.test$helpful)
 accu <- paste('Accuracy',1-classiferror)
 accu
-#Accuracy 0.881561238223419
+#Accuracy 0.8815612382234192 ie. 88.2%
 
 
 #NAIVE BAYES
@@ -472,7 +472,7 @@ table(nb_pred, normed.test$helpful, dnn=c("Prediction","Actual"))
 nb.classiferror <- mean(nb_pred != normed.test$helpful)
 nb.accu <- paste('Accuracy',1-nb.classiferror)
 nb.accu
-#"Accuracy 0.775235531628533"
+#Accuracy = 0.775235531628533 ie. 77.5%
 
 
 #RANDOM FOREST
@@ -495,13 +495,15 @@ testforest = predict(model_rf_under, newdata=normed.testfactor)
 #confusion matrix downsampled model
 table(testforest, normed.testfactor$helpful, dnn=c("Observed","Predicted"))
 #testforest     
-            Predicted
-Observed     0     1
-0           1425   203
-1            0    10260
+#           Predicted
+#Observed    0    1
+#        0 1079 2978
+#        1  346 7485
+#when downsampled we're better able to predict reviews that are not helpful
+#true negative rate - 0.757193
+#TN/TN + FN  
+#1079/(1079 + 346)
 
-#when downsampled we're much better able to predict reviews that are not helpful
-#True Negative Rate = TN/TN+FP = 1425/1425 + 203 = 0.8753071
-rf_accu <- (10260 + 1425)/(10260 + 203 + 0 + 1425)
+rf_accu <- (7485 + 1079)/(7485 + 2978 + 346 + 1079)
 rf_accu
-#Accuracy 0.982924
+# Accuracy 0.757193 ie. 75.7%
