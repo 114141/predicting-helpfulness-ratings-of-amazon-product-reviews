@@ -1,4 +1,4 @@
-Using “Amazon Product Data” for the “Beauty” category collected by Julian McAuley[1], we will endeavor to learn the characteristics of helpful customer reviews and see if we can predict the helpfulness of reviews.
+Using “Amazon Product Data” for the “Beauty” category we will endeavor to learn the characteristics of helpful customer reviews and see if we can predict the helpfulness of reviews.
 
 
 EXPLORATORY ANALYSIS & DATA PREPARATION
