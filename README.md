@@ -6,7 +6,9 @@ EXPLORATORY ANALYSIS & DATA PREPARATION
 ATTRIBUTE CHARACTERISTICS AND DESCRPTIVE STATISTICS
 
 There are 2,023,070 Beauty product reviews included in the original dataset.  The original dataset was formatted in loose json and had to be converted to strict json using a python script which can be found on the project github as (see Appendix). After this was done, the data was then streamed into R for processing.
+
 The 9 variables included in the original dataset:
+
 •	reviewerID – the ID of the reviewer
 •	asin – the ID of the product
 •	reviewerName – the name of the reviewer
